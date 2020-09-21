@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<header class="masthead text-center text-white">
+  <div class="masthead-content">
+    <div class="container">
+        <div class="jumbotron">
+          <h2 class="masthead-subheading mb-0">Available Events:</h2>
+
+              {% for event in events %}
+              <div class = 'row'>
+                  <a href="{% url 'event_details' event.slug %}"
+                  <p> {{event.name}} - {{event.created_by}} - {{event.date}} - {{event.location}}</p>
+                  </a>
+                  {% if event.remaining_tickets != 0 %}
+                    <a href="{% url 'book_tickets' event.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
+                  {% else %}
+                    <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
+                  {% endif %}
+              </div>
+              {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="bg-circle-1 bg-circle"></div>
+  <div class="bg-circle-2 bg-circle"></div>
+  <div class="bg-circle-3 bg-circle"></div>
+  <div class="bg-circle-4 bg-circle"></div>
+</header>
+{% endblock %}

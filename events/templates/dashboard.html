@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<header class="masthead text-center text-white">
+  <div class="masthead-content">
+    <div class="container">
+        <div class="jumbotron">
+          <h2 class="masthead-subheading mb-0"> {{user}}'s Dashboard</h2>
+          <h5 class="masthead-subheading mb-0"> Followers : {{followers}} </h6>
+          <h6 class="masthead-subheading mb-0"> Following : {{following}}</h6>
+          <h6 class="masthead-subheading mb-0"> My Events:</h6>
+          {% for event in myevents %}
+            <p class="masthead-subheading mb-0">{{event.name}}</p>
+          {% endfor %}
+          <h6 class="masthead-subheading mb-0"> My Reservations:</h6>
+          {% for reservation in upcoming_resevations %}
+            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+          {% endfor %}
+          <h6 class="masthead-subheading mb-0"> Past Reservations:</h6>
+          {% for reservation in past_reservations %}
+            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+          {% endfor %}
+          <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}" role="button">Create an Event!</a>
+        </div>
+    </div>
+  </div>
+  <div class="bg-circle-1 bg-circle"></div>
+  <div class="bg-circle-2 bg-circle"></div>
+  <div class="bg-circle-3 bg-circle"></div>
+  <div class="bg-circle-4 bg-circle"></div>
+</header>
+{% endblock %}
