@@ -1,10 +1,32 @@
 from django.shortcuts import render
 from django.utils import timezone
 from django.contrib.auth.models import User
-from rest_framework.generics import (ListAPIView)
+from rest_framework.generics import (ListAPIView, CreateAPIView, RetrieveUpdateAPIView)
 from rest_framework.permissions import IsAuthenticated
 from events.models import Event, Connection
-from .serializers import EventListSerializer, BookedEventSerializer, UserSerializer, FollowingSeializer
+from .serializers import (EventListSerializer, BookedEventSerializer, UserSerializer,
+FollowingSeializer,RegisterSerializer, EventCreateSerializer
+)
+
+class SignupAPI(CreateAPIView):
+    serializer_class = RegisterSerializer
+
+
+class EventCreate(CreateAPIView):
+    serializer_class = EventCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class ModifyEvent(RetrieveUpdateAPIView):
+	queryset = Event.objects.all()
+	serializer_class = EventCreateSerializer
+	lookup_field = 'id'
+	lookup_url_kwarg = 'event_id'
+	permission_classes = [IsAuthenticated]
+
 
 
 class UpcomingEvents (ListAPIView):

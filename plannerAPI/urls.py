@@ -1,15 +1,20 @@
 from django.urls import path
-from .views import(UpcomingEvents, OrganizerEvents, MyBookedEvents, OrganizersIFollow )
+from .views import(UpcomingEvents, OrganizerEvents, MyBookedEvents, OrganizersIFollow,
+				SignupAPI, EventCreate , ModifyEvent)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
 urlpatterns = [
+
+    path('api/signup/', SignupAPI.as_view(), name='api_sigup'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('events/upcoming/', UpcomingEvents.as_view() , name='upcoming-events'),
-    path('events/<int:organizer_id>/', OrganizerEvents.as_view() , name='organizer-events'),
-    path('events/booked/<int:member_id>/', MyBookedEvents.as_view() , name='my-booked-events'),
-    path('followings/<int:member_id>/', OrganizersIFollow.as_view() , name='organizers-i-follow'),
+    path('events/cteate/', EventCreate.as_view() , name='create_event'),
+    path('events/modify/<int:event_id>', ModifyEvent.as_view() , name='modify_event'),
+    path('events/upcoming/', UpcomingEvents.as_view() , name='upcoming_events'),
+    path('events/<int:organizer_id>/', OrganizerEvents.as_view() , name='organizer_events'),
+    path('events/booked/<int:member_id>/', MyBookedEvents.as_view() , name='my_booked_events'),
+    path('followings/<int:member_id>/', OrganizersIFollow.as_view() , name='organizers_i_follow'),
 
 ]

@@ -36,7 +36,7 @@ class ReservationForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        exclude = ['created_by', 'attendees', 'slug', 'remaining_tickets']
+        exclude = ['created_by', 'slug', 'remaining_tickets']
         widgets = { 'tags': forms.CheckboxSelectMultiple ,
                     'date': forms.DateTimeInput(attrs={'type': 'datetime-local'})}
 
