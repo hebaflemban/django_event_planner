@@ -12,7 +12,9 @@
           <p>{{event.description}}</p>
           <p>{{event.location}}</p>
           <p>{{event.max_capacity}}</p>
-          <p>{{event.tags.name}}</p>
+          {% for tag in event.tags.all %}
+              <p>{{tag.name}}</p>
+          {% endfor %}
         {% if request.user == event.created_by %}
           <a href="{% url 'update_event' event.slug %}" class = "btn btn-primary btn-xl rounded-pill mt-5" >
             Edit Event
@@ -21,7 +23,7 @@
             <h6 class="masthead-subheading mb-0">{{event.name}} stats</h6>
             <p>Available seats: {{event.remaining_tickets}} out of :{{event.max_capacity}}</p>
             <p>Guest Info:</p>
-            {% for reservation in reservations %}
+            {% for reservation in event.reservations.all %}
               <p>{{reservation.guest.username}} - {{reservation.num_tickets}} - {{reservation.reservation_date}}</p>
             {% endfor %}
 

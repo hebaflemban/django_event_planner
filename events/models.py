@@ -9,15 +9,15 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Connection(models.Model):
-    user_id = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
-    following_user_id = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    following_user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     class Meta:
-        unique_together = ("user_id", "following_user_id")
+        unique_together = ("user", "following_user")
         ordering = ["-created"]
 
     def __str__(self):
-        return f"{self.user_id} is now following {self.following_user_id}"
+        return f"{self.user} is now following {self.following_user}"
 
 
 class Tag(models.Model):
@@ -34,7 +34,7 @@ class Event(models.Model):
     status = models.CharField(max_length=1, default='a', choices=STATUS)
     images = models.ImageField(null= True, blank = True)
     date = models.DateTimeField(null= True, blank = True)
-    post_date = models.DateField(auto_now_add=True, null= True, blank = True)
+    post_date = models.DateField(auto_now_add=True)
     description = models.TextField(null= True, blank = True)
     location = models.CharField(max_length = 50, null= True, blank = True)
     max_capacity = models.PositiveIntegerField(null= True, blank = True)
@@ -44,7 +44,7 @@ class Event(models.Model):
     price = models.FloatField(null= True, blank = True)
     remaining_tickets = models.PositiveIntegerField(null= True, blank = True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,
-                    related_name='MyEvents', related_query_name ='organizer')
+                    related_name='events', related_query_name ='organizer')
     tags = models.ManyToManyField(Tag, related_name='events')
 
     def __str__(self):

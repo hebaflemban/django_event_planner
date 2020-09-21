@@ -28,11 +28,8 @@ def events_list(request):
 
 def event_details(request, event_slug):
     event = Event.objects.get(slug = event_slug)
-    reservations = event.reservations.all()
-    print(reservations)
     context = {
         "event" : event,
-        "reservations" : reservations
     }
     return render(request, 'event_details.html', context)
 
@@ -50,7 +47,6 @@ def create_event(request):
             event = form.save(commit=False)
             event.created_by = organizer
             event.save()
-            event.save_m2m()
             return redirect('events_list')
     context = {
         'form': form,
@@ -91,6 +87,7 @@ def book_tickets(request, event_slug):
             reservation.event = event
             reservation.date = event.date
             reservation.save()
+            event.save()
             messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")
 
             return redirect('dashboard', request.user.id)
@@ -125,12 +122,7 @@ class Dashboard(View):
     template_name = 'dashboard.html'
 
     def get(self, request, *args, **kwargs):
-        print(request.user.reservations.filter(date__gte = timezone.now()))
         context = {
-            "user": request.user,
-            "followers" : request.user.followers.count(),
-            "following" : request.user.following.count(),
-            "myevents" : request.user.MyEvents.all(),
             "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
             "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
         }

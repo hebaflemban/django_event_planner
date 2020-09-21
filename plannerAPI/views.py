@@ -18,3 +18,12 @@ class OrganizerEvents (ListAPIView):
 
     def get_queryset(self,):
         return Event.objects.filter(created_by = self.request.user)
+
+
+class MyBookedEvents (ListAPIView):
+    serializer_class = EventListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'member_id'
+
+    def get_queryset(self,):
+        return self.request.user.events.all()
