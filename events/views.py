@@ -5,8 +5,6 @@ from django.contrib.auth.models import User
 from django.views import View
 from django.db.models.signals import pre_save
 from django.db.models import Q
-from django.conf import settings
-from django.urls import reverse
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from django.http import Http404
@@ -17,7 +15,6 @@ from .models import Event, Connection, Tag, Reservation
 
 
 def home(request):
-    print('home'*10)
     return render(request, 'home.html')
 
 
@@ -121,6 +118,50 @@ def search(request):
     return render(request, 'search.html', context)
 
 
+
+class Dashboard(View):
+    model = User
+    slug_field = 'username'
+    template_name = 'dashboard.html'
+
+    def get(self, request, *args, **kwargs):
+        print(request.user.reservations.filter(date__gte = timezone.now()))
+        context = {
+            "user": request.user,
+            "followers" : request.user.followers.count(),
+            "following" : request.user.following.count(),
+            "myevents" : request.user.MyEvents.all(),
+            "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
+            "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
+        }
+        return render (request, self.template_name, context)
+
+def create_user_slug(instance, new_slug=None):
+    slug = slugify(instance.username)
+    if new_slug is not None:
+        slug = new_slug
+    qs = User.objects.filter(slug=slug)
+    if qs.exists():
+        try:
+            int(slug[-1])
+            if "-" in slug:
+                slug_list = slug.split("-")
+                new_slug = "%s%s" % (slug[:-len(slug_list[-1])], int(slug_list[-1]) + 1)
+            else:
+                new_slug = "%s-1" % (slug)
+        except:
+            new_slug = "%s-1" % (slug)
+        return create_slug(instance, new_slug=new_slug)
+    return slug
+
+
+@receiver(pre_save, sender=Dashboard)
+def generate_slug(instance, *args, **kwargs):
+    if not instance.slug_field:
+        instance.slug_field=create_user_slug(instance)
+
+
+
 class Signup(View):
     form_class = UserSignup
     template_name = 'signup.html'
@@ -173,47 +214,3 @@ class Logout(View):
         logout(request)
         messages.success(request, "You have successfully logged out.")
         return redirect("login")
-
-
-
-
-class Dashboard(View):
-    model = User
-    slug_field = 'username'
-    template_name = 'dashboard.html'
-
-    def get(self, request, *args, **kwargs):
-        print(request.user.reservations.filter(date__gte = timezone.now()))
-        context = {
-            "user": request.user,
-            "followers" : request.user.followers.count(),
-            "following" : request.user.following.count(),
-            "myevents" : request.user.MyEvents.all(),
-            "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
-            "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
-        }
-        return render (request, self.template_name, context)
-
-def create_user_slug(instance, new_slug=None):
-    slug = slugify(instance.username)
-    if new_slug is not None:
-        slug = new_slug
-    qs = User.objects.filter(slug=slug)
-    if qs.exists():
-        try:
-            int(slug[-1])
-            if "-" in slug:
-                slug_list = slug.split("-")
-                new_slug = "%s%s" % (slug[:-len(slug_list[-1])], int(slug_list[-1]) + 1)
-            else:
-                new_slug = "%s-1" % (slug)
-        except:
-            new_slug = "%s-1" % (slug)
-        return create_slug(instance, new_slug=new_slug)
-    return slug
-
-
-@receiver(pre_save, sender=Dashboard)
-def generate_slug(instance, *args, **kwargs):
-    if not instance.slug_field:
-        instance.slug_field=create_user_slug(instance)
