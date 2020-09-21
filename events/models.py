@@ -48,7 +48,7 @@ class Event(models.Model):
     tags = models.ManyToManyField(Tag, related_name='events')
 
     def __str__(self):
-        return str(self.id)
+        return f"{self.id} - {self.name} - {self.created_by}"
 
     def get_absolute_url(self):
         return reverse('eventdetails', kwargs={'id':self.id})
@@ -63,6 +63,8 @@ class Reservation(models.Model):
     reservation_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.id} - {self.event} - {self.guest}"
 
 def create_slug(instance, new_slug=None):
     slug = slugify(instance.name)
