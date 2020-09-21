@@ -22,7 +22,7 @@
             <p>Available seats: {{event.remaining_tickets}} out of :{{event.max_capacity}}</p>
             <p>Guest Info:</p>
             {% for reservation in reservations %}
-              <p>{{reservation}}</p>
+              <p>{{reservation.guest.username}} - {{reservation.num_tickets}} - {{reservation.reservation_date}}</p>
             {% endfor %}
 
 

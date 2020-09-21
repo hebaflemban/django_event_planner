@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views import View
 from django.db.models.signals import pre_save
+from django.db.models import Q
 from django.conf import settings
 from django.urls import reverse
 from django.dispatch import receiver
@@ -11,10 +12,8 @@ from django.template.defaultfilters import slugify
 from django.http import Http404
 from django.contrib import messages
 from django.utils import timezone
-
 from .forms import UserSignup, UserLogin, EventForm, ReservationForm
 from .models import Event, Connection, Tag, Reservation
-
 
 
 def home(request):
@@ -106,6 +105,20 @@ def book_tickets(request, event_slug):
     return render(request, 'book_tickets.html', context)
 
 
+def search(request):
+    search_result = None
+    search_term = None
+    if 'search_events' in request.GET:
+        search_term = request.GET['search_events']
+        search_result = Event.objects.all().filter(Q(name__icontains=search_term) |
+                        Q(description__icontains=search_term) | Q(created_by__username__icontains=search_term))
+
+    context = {
+        'search_term' : search_term,
+        'search_result' : search_result
+    }
+
+    return render(request, 'search.html', context)
 
 
 class Signup(View):

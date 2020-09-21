@@ -19,7 +19,7 @@
           {% endfor %}
           <h6 class="masthead-subheading mb-0"> Past Reservations:</h6>
           {% for reservation in past_reservations %}
-            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
           {% endfor %}
           <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}" role="button">Create an Event!</a>
         </div>
