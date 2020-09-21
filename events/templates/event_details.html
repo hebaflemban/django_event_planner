@@ -15,21 +15,24 @@
           {% for tag in event.tags.all %}
               <p>{{tag.name}}</p>
           {% endfor %}
-        {% if request.user == event.created_by %}
-          <a href="{% url 'update_event' event.slug %}" class = "btn btn-primary btn-xl rounded-pill mt-5" >
-            Edit Event
-          </a>
-          <div class="jumbotron">
-            <h6 class="masthead-subheading mb-0">{{event.name}} stats</h6>
-            <p>Available seats: {{event.remaining_tickets}} out of :{{event.max_capacity}}</p>
-            <p>Guest Info:</p>
-            {% for reservation in event.reservations.all %}
-              <p>{{reservation.guest.username}} - {{reservation.num_tickets}} - {{reservation.reservation_date}}</p>
-            {% endfor %}
-
-
-          </div>
-        {% endif %}
+          {% if event.remaining_tickets != 0 %}
+            <a href="{% url 'book_tickets' event.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
+          {% else %}
+            <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
+          {% endif %}
+          {% if request.user == event.created_by %}
+            <a href="{% url 'update_event' event.slug %}" class = "btn btn-primary btn-xl rounded-pill mt-5" >
+              Edit Event
+            </a>
+            <div class="jumbotron">
+              <h6 class="masthead-subheading mb-0">{{event.name}} stats</h6>
+              <p>Available seats: {{event.remaining_tickets}} out of :{{event.max_capacity}}</p>
+              <p>Guest Info:</p>
+              {% for reservation in event.reservations.all %}
+                <p>{{reservation.guest.username}} - {{reservation.num_tickets}} - {{reservation.reservation_date}}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
 
 
