@@ -19,9 +19,18 @@ def home(request):
 
 
 def events_list(request):
-    events = Event.objects.filter(date__gte = timezone.now())
+    events = Event.objects.all()
+    # filter(date__gte = timezone.now())
+    search_result = None
+    search_term = None
+    if 'search_events' in request.GET:
+        search_term = request.GET['search_events']
+        search_result = Event.objects.all().filter(Q(name__icontains=search_term) |
+                        Q(description__icontains=search_term) | Q(created_by__username__icontains=search_term))
     context = {
-        'events': events
+        'events': events,
+        'search_result' : search_result
+
     }
     return render(request, 'events_list.html', context)
 
