@@ -112,7 +112,7 @@ def search(request):
         'search_result' : search_result
     }
 
-    return render(request, 'search.html', context)
+    return render(request, 'events_list.html', context)
 
 
 

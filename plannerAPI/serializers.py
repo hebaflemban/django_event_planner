@@ -16,7 +16,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 		return validated_data
 
 
-class EventCreateSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email' ]
+
+
+class CreateEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         exclude = ['created_by', 'slug', 'remaining_tickets']
@@ -34,10 +40,24 @@ class BookedEventSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = [ 'event', 'num_tickets','reservation_date' ]
 
-class UserSerializer(serializers.ModelSerializer):
+
+class BookEventSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['username', 'first_name', 'last_name', 'email' ]
+        model = Reservation
+        fields = [ 'num_tickets' ]
+
+
+class EventReservationsSerializer(serializers.ModelSerializer):
+    guest = UserSerializer()
+    class Meta:
+        model = Reservation
+        fields = [ 'guest', 'num_tickets','reservation_date' ]
+
+
+class FollowUserSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Connection
+		fields = ['following_user']
 
 
 class FollowingSeializer(serializers.ModelSerializer):

@@ -6,20 +6,20 @@
   <div class="masthead-content">
     <div class="container">
         <div class="jumbotron">
-          <h2 class="masthead-subheading mb-0"> {{user}}'s Dashboard</h2>
-          <h5 class="masthead-subheading mb-0"> Followers : {{request.user.followers.count}} </h6>
-          <h6 class="masthead-subheading mb-0"> Following : {{request.user.following.count}}</h6>
-          <h6 class="masthead-subheading mb-0"> My Events:</h6>
+          <h2 class=""> {{user}}'s Dashboard</h2>
+          <h6 class=""> Followers : {{request.user.followers.count}} </h6>
+          <h6 class=""> Following : {{request.user.following.count}}</h6>
+          <h6 class=""> My Events:</h6>
           {% for event in request.user.events.all %}
-            <p class="masthead-subheading mb-0">{{event.name}}</p>
+            <p class="">{{event.name}}</p>
           {% endfor %}
-          <h6 class="masthead-subheading mb-0"> My Reservations:</h6>
+          <h6 class=""> My Reservations:</h6>
           {% for reservation in upcoming_resevations %}
-            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+            <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
           {% endfor %}
-          <h6 class="masthead-subheading mb-0"> Past Reservations:</h6>
+          <h6 class=""> Past Reservations:</h6>
           {% for reservation in past_reservations %}
-            <p class="masthead-subheading mb-0">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
+            <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
           {% endfor %}
           <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}" role="button">Create an Event!</a>
         </div>
