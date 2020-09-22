@@ -22,6 +22,7 @@
             <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
           {% endfor %}
           <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}" role="button">Create an Event!</a>
+          <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'update_profile' user.id %}" role="button">Edit profile</a>
         </div>
     </div>
   </div>

@@ -10,12 +10,42 @@ from django.template.defaultfilters import slugify
 from django.http import Http404
 from django.contrib import messages
 from django.utils import timezone
-from .forms import UserSignup, UserLogin, EventForm, ReservationForm
+from .forms import UserSignup, UserLogin, UserProfile, EventForm, ReservationForm
 from .models import Event, Connection, Tag, Reservation
+
+
+class Dashboard(View):
+    model = User
+    slug_field = 'username'
+    template_name = 'dashboard.html'
+
+    def get(self, request, *args, **kwargs):
+        context = {
+            "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
+            "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
+        }
+        return render (request, self.template_name, context)
 
 
 def home(request):
     return render(request, 'home.html')
+
+
+def update_profile(request, user_id):
+    if not request.user.is_authenticated:
+        messages.warning(request, "messages : You don\'t have access ")
+        raise Http404('You don\'t have access ')
+    user = User.objects.get(id = request.user.id)
+    form = UserProfile(instance=user)
+    if request.method == "POST":
+        form = UserProfile(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard', user.id)
+    context = {
+        'form': form,
+    }
+    return render (request, 'update_profile.html', context)
 
 
 def events_list(request):
@@ -30,7 +60,6 @@ def events_list(request):
     context = {
         'events': events,
         'search_result' : search_result
-
     }
     return render(request, 'events_list.html', context)
 
@@ -41,7 +70,6 @@ def event_details(request, event_slug):
         "event" : event,
     }
     return render(request, 'event_details.html', context)
-
 
 
 def create_event(request):
@@ -98,7 +126,6 @@ def book_tickets(request, event_slug):
             reservation.save()
             event.save()
             messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")
-
             return redirect('dashboard', request.user.id)
 
     context = {
@@ -124,19 +151,6 @@ def search(request):
     return render(request, 'events_list.html', context)
 
 
-
-class Dashboard(View):
-    model = User
-    slug_field = 'username'
-    template_name = 'dashboard.html'
-
-    def get(self, request, *args, **kwargs):
-        context = {
-            "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
-            "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
-        }
-        return render (request, self.template_name, context)
-
 def create_user_slug(instance, new_slug=None):
     slug = slugify(instance.username)
     if new_slug is not None:
@@ -160,7 +174,6 @@ def create_user_slug(instance, new_slug=None):
 def generate_slug(instance, *args, **kwargs):
     if not instance.slug_field:
         instance.slug_field=create_user_slug(instance)
-
 
 
 class Signup(View):
