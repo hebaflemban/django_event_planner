@@ -21,7 +21,7 @@ class CreateEvent(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save(created_by=self.request.user, remaining_tickets = max_capacity)
 
 
 class ModifyEvent(RetrieveUpdateAPIView):
@@ -48,13 +48,10 @@ class UpcomingEvents (ListAPIView):
 
 class OrganizerEvents (ListAPIView):
     serializer_class = EventListSerializer
-    lookup_field = 'id'
-    lookup_url_kwarg = 'organizer_id'
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self,):
-        if self.request.user.id == self.kwargs['organizer_id']:
-            return Event.objects.filter(created_by = self.request.user)
+        return Event.objects.filter(created_by = self.request.user)
 
 
 class MyBookedEvents (ListAPIView):
@@ -88,10 +85,7 @@ class FollowUser(CreateAPIView):
 
 class OrganizersIFollow(ListAPIView):
     serializer_class = FollowingSeializer
-    lookup_field = 'id'
-    lookup_url_kwarg = 'member_id'
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self,):
-        if self.request.user.id == self.kwargs['member_id']:
-            return self.request.user.following.all()
+        return self.request.user.following.all()

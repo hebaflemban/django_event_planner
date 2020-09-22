@@ -9,15 +9,15 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Connection(models.Model):
-    user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
-    following_user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    following_user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     class Meta:
         unique_together = ("user", "following_user")
         ordering = ["-created"]
 
     def __str__(self):
-        return f"{self.user} is now following {self.following_user}"
+        return f"{self.user} : {self.following_user}"
 
 
 class Tag(models.Model):
@@ -42,7 +42,7 @@ class Event(models.Model):
     is_public = models.BooleanField(default=True)
     is_free = models.BooleanField(default=True)
     price = models.FloatField(null= True, blank = True)
-    remaining_tickets = models.PositiveIntegerField(null= True, blank = True)
+    remaining_tickets = models.PositiveIntegerField(default=max_capacity, null= True, blank = True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,
                     related_name='events', related_query_name ='organizer')
     tags = models.ManyToManyField(Tag, related_name='events')
@@ -58,8 +58,7 @@ class Reservation(models.Model):
     guest = models.ForeignKey(User, related_name= 'reservations', on_delete=models.CASCADE)
     event = models.ForeignKey(Event, related_name= 'reservations',on_delete=models.CASCADE)
     date = models.DateField(null= True, blank = True)
-    num_tickets = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1),
-                MaxValueValidator(5)], null= True, blank = True)
+    num_tickets = models.PositiveIntegerField(default=1, null= True, blank = True)
     reservation_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 

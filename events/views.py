@@ -14,17 +14,27 @@ from .forms import UserSignup, UserLogin, UserProfile, EventForm, ReservationFor
 from .models import Event, Connection, Tag, Reservation
 
 
-class Dashboard(View):
-    model = User
-    slug_field = 'username'
-    template_name = 'dashboard.html'
+def dashboard(request, user_id):
+    can_follow = True
+    user = User.objects.get(id = user_id)
 
-    def get(self, request, *args, **kwargs):
-        context = {
-            "upcoming_resevations" : request.user.reservations.filter(date__gte = timezone.now()),
-            "past_reservations" : request.user.reservations.filter(date__lt = timezone.now())
-        }
-        return render (request, self.template_name, context)
+    if user.followers.filter(following_user=request.user).exists():
+        can_follow = False
+
+    if 'follow-unfollow' in request.POST:
+        if user.followers.filter(user = user, following_user=request.user).exists():
+            user.followers.filter(user = user, following_user=request.user).delete()
+        else:
+            new_connection = Connection(user = user , following_user = request.user )
+            new_connection.save()
+
+    context = {
+        'can_follow' : can_follow,
+        'profile' : user,
+        "upcoming_resevations" : user.reservations.filter(date__gte = timezone.now()),
+        "past_reservations" : user.reservations.filter(date__lt = timezone.now())
+    }
+    return render (request, 'dashboard.html', context)
 
 
 def home(request):
@@ -35,13 +45,12 @@ def update_profile(request, user_id):
     if not request.user.is_authenticated:
         messages.warning(request, "messages : You don\'t have access ")
         raise Http404('You don\'t have access ')
-    user = User.objects.get(id = request.user.id)
-    form = UserProfile(instance=user)
+    form = UserProfile(instance=request.user)
     if request.method == "POST":
-        form = UserProfile(request.POST, instance=user)
+        form = UserProfile(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('dashboard', user.id)
+            return redirect('dashboard', request.user.id)
     context = {
         'form': form,
     }
@@ -49,16 +58,16 @@ def update_profile(request, user_id):
 
 
 def events_list(request):
-    events = Event.objects.all()
+    active_events = Event.objects.all()
     # filter(date__gte = timezone.now())
     search_result = None
     search_term = None
     if 'search_events' in request.GET:
         search_term = request.GET['search_events']
-        search_result = Event.objects.all().filter(Q(name__icontains=search_term) |
+        search_result = active_events.filter(Q(name__icontains=search_term) |
                         Q(description__icontains=search_term) | Q(created_by__username__icontains=search_term))
     context = {
-        'events': events,
+        'events': active_events,
         'search_result' : search_result
     }
     return render(request, 'events_list.html', context)
@@ -76,14 +85,17 @@ def create_event(request):
     if not request.user.is_authenticated:
         messages.warning(request, "messages : You don\'t have access ")
         raise Http404('You don\'t have access ')
-    organizer = User.objects.get(id=request.user.id)
     form = EventForm()
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
-            event.created_by = organizer
+            event.created_by = request.user
+            event.remaining_tickets = form.cleaned_data['max_capacity']
+
             event.save()
+            event.remaining_tickets = event.max_capacity
+
             return redirect('events_list')
     context = {
         'form': form,
@@ -118,62 +130,25 @@ def book_tickets(request, event_slug):
     if request.method == "POST":
         form = ReservationForm(request.POST)
         if form.is_valid():
-            reservation = form.save(commit=False)
-            event.remaining_tickets = event.max_capacity - reservation.num_tickets
-            reservation.guest = request.user
-            reservation.event = event
-            reservation.date = event.date
-            reservation.save()
-            event.save()
-            messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")
-            return redirect('dashboard', request.user.id)
+            if form.cleaned_data['num_tickets'] > event.remaining_tickets:
+                messages.warning(request, f"Sorry there is only {event.remaining_tickets} tickets left for this event")
+                return redirect("book_tickets", event_slug)
+            else:
+                reservation = form.save(commit=False)
+                event.remaining_tickets = event.max_capacity - reservation.num_tickets
+                reservation.guest = request.user
+                reservation.event = event
+                reservation.date = event.date
+                reservation.save()
+                event.save()
+                messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")
+                return redirect('dashboard', request.user.id)
 
     context = {
         'form': form,
         'event' : event,
     }
     return render(request, 'book_tickets.html', context)
-
-
-def search(request):
-    search_result = None
-    search_term = None
-    if 'search_events' in request.GET:
-        search_term = request.GET['search_events']
-        search_result = Event.objects.all().filter(Q(name__icontains=search_term) |
-                        Q(description__icontains=search_term) | Q(created_by__username__icontains=search_term))
-
-    context = {
-        'search_term' : search_term,
-        'search_result' : search_result
-    }
-
-    return render(request, 'events_list.html', context)
-
-
-def create_user_slug(instance, new_slug=None):
-    slug = slugify(instance.username)
-    if new_slug is not None:
-        slug = new_slug
-    qs = User.objects.filter(slug=slug)
-    if qs.exists():
-        try:
-            int(slug[-1])
-            if "-" in slug:
-                slug_list = slug.split("-")
-                new_slug = "%s%s" % (slug[:-len(slug_list[-1])], int(slug_list[-1]) + 1)
-            else:
-                new_slug = "%s-1" % (slug)
-        except:
-            new_slug = "%s-1" % (slug)
-        return create_slug(instance, new_slug=new_slug)
-    return slug
-
-
-@receiver(pre_save, sender=Dashboard)
-def generate_slug(instance, *args, **kwargs):
-    if not instance.slug_field:
-        instance.slug_field=create_user_slug(instance)
 
 
 class Signup(View):

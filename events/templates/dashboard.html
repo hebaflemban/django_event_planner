@@ -6,23 +6,47 @@
   <div class="masthead-content">
     <div class="container">
         <div class="jumbotron">
-          <h2 class=""> {{user}}'s Dashboard</h2>
-          <h6 class=""> Followers : {{request.user.followers.count}} </h6>
-          <h6 class=""> Following : {{request.user.following.count}}</h6>
-          <h6 class=""> My Events:</h6>
-          {% for event in request.user.events.all %}
+          <h2 class=""> {{profile}}'s Dashboard</h2>
+          <h6 class=""> Followers : {{profile.followers.count}} </h6>
+          <h6 class=""> Following : {{profile.following.count}}</h6>
+
+          <h6 class=""> {{profile}}'s Events:</h6>
+          {% for event in profile.events.all %}
             <p class="">{{event.name}}</p>
           {% endfor %}
-          <h6 class=""> My Reservations:</h6>
-          {% for reservation in upcoming_resevations %}
-            <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
-          {% endfor %}
-          <h6 class=""> Past Reservations:</h6>
-          {% for reservation in past_reservations %}
-            <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
-          {% endfor %}
-          <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}" role="button">Create an Event!</a>
-          <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'update_profile' user.id %}" role="button">Edit profile</a>
+
+          {% if request.user != profile %}
+
+           <form action="" method="POST">
+             {% csrf_token %}
+             <input type="hidden" id="user_id" name="follow-unfollow" value="{{profile.id}}">
+             <button type="submit" class="btn btn-primary btn-xl rounded-pill mt-5" value="Create" />
+               {% if can_follow %}
+                 Follow
+               {% else %}
+                 Unfollow
+               {% endif %}
+             </button>
+           </form>
+
+          {% endif %}
+
+          {% if request.user == profile %}
+              <h6 class=""> My Reservations:</h6>
+              {% for reservation in upcoming_resevations %}
+                <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+              {% endfor %}
+
+              <h6 class=""> Past Reservations:</h6>
+              {% for reservation in past_reservations %}
+                <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>
+              {% endfor %}
+
+              <a class = "btn btn-primary btn-xl rounded-pill mt-5" href="{% url 'create_event' %}"
+                 role="button">Create an Event!</a>
+              <a class = "btn btn-primary btn-xl rounded-pill mt-5"
+                 href="{% url 'update_profile' profile.id %}" role="button">Edit profile</a>
+          {% endif %}
         </div>
     </div>
   </div>

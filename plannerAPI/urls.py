@@ -20,9 +20,9 @@ urlpatterns = [
     path('events/upcoming/', UpcomingEvents.as_view() , name='upcoming_events'),
 	path('events/booked/<int:member_id>/', MyBookedEvents.as_view() , name='my_booked_events'),
     path('events/reservations/<int:event_id>/', EventReservations.as_view() , name='event_reservations'),
-    path('events/<int:organizer_id>/', OrganizerEvents.as_view() , name='organizer_events'),
+    path('events/byorgnaizer/', OrganizerEvents.as_view() , name='organizer_events'),
 
 	path('follow/', FollowUser.as_view() , name='follow_user'),
-    path('followings/<int:member_id>/', OrganizersIFollow.as_view() , name='organizers_i_follow'),
+    path('followings/', OrganizersIFollow.as_view() , name='organizers_i_follow'),
 
 ]

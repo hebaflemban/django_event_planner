@@ -9,7 +9,7 @@
           <form action="{% url 'book_tickets' event.slug %}" method="POST">
             {% csrf_token %}
             {{form|crispy}}
-            <input class = "btn btn-primary btn-xl rounded-pill mt-5" type="submit" value="Save my seats!">
+            <input class = "btn btn-primary btn-xl rounded-pill mt-5" type="submit" max_value = 8 value="Save my seats!">
           </form>
       </div>
     </div>
