@@ -36,7 +36,9 @@ class EventForm(forms.ModelForm):
 		model = Event
 		exclude = ['created_by', 'slug', 'remaining_tickets']
 		widgets = { 'tags': forms.CheckboxSelectMultiple ,
-					'date': forms.DateTimeInput(attrs={'type': 'datetime-local'})}
+					'date': forms.DateInput(attrs={'type': 'date-local'}),
+					'time': forms.TimeInput(attrs={'type': 'time'})
+					}
 
 
 class TagForm(forms.Form):

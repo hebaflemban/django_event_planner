@@ -32,9 +32,26 @@
           {% endif %}
 
           {% if request.user == profile %}
+
               <h6 class=""> My Reservations:</h6>
               {% for reservation in upcoming_resevations %}
-                <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.event.num_tickets}}</p>
+                <a href="{% url 'reservation_details' reservation.id %}"
+                <p class="">{{reservation.event.name}} - {{reservation.event_date}} - {{reservation.num_tickets}}</p>
+                </a>
+
+
+                <p>jjj{{can_cancel}}</p>
+
+                <form action="" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" id="reservation.id" name="cancel_reservation" value="{{reservation.id}}">
+                  {% if can_cancel %}
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill mt-5" value="Create">Cancel</button>
+                  {% else %}
+                    <button type="button" class="btn btn-secondary btn-lgrounded-pill mt-5" disabled>Cancel</button>
+                  {% endif %}
+                </form>
+
               {% endfor %}
 
               <h6 class=""> Past Reservations:</h6>
@@ -46,6 +63,7 @@
                  role="button">Create an Event!</a>
               <a class = "btn btn-primary btn-xl rounded-pill mt-5"
                  href="{% url 'update_profile' profile.id %}" role="button">Edit profile</a>
+
           {% endif %}
         </div>
     </div>

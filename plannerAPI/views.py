@@ -21,7 +21,7 @@ class CreateEvent(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user, remaining_tickets = max_capacity)
+        serializer.save(created_by=self.request.user)
 
 
 class ModifyEvent(RetrieveUpdateAPIView):

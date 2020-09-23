@@ -10,8 +10,10 @@ from django.template.defaultfilters import slugify
 from django.http import Http404
 from django.contrib import messages
 from django.utils import timezone
+from datetime import datetime, timedelta
 from .forms import UserSignup, UserLogin, UserProfile, EventForm, ReservationForm
 from .models import Event, Connection, Tag, Reservation
+
 
 
 def dashboard(request, user_id):
@@ -31,8 +33,8 @@ def dashboard(request, user_id):
     context = {
         'can_follow' : can_follow,
         'profile' : user,
-        "upcoming_resevations" : user.reservations.filter(date__gte = timezone.now()),
-        "past_reservations" : user.reservations.filter(date__lt = timezone.now())
+        "upcoming_resevations" : user.reservations.filter(event_date__gte = timezone.now()),
+        "past_reservations" : user.reservations.filter(event_date__lt = timezone.now())
     }
     return render (request, 'dashboard.html', context)
 
@@ -81,6 +83,31 @@ def event_details(request, event_slug):
     return render(request, 'event_details.html', context)
 
 
+def reservation_details(request, reservation_id):
+    reservation = Reservation.objects.get(id = reservation_id)
+    can_cancel = True
+
+    if (reservation.event_date == datetime.now().date()) \
+        and (reservation.event_time.hour-datetime.now().time().hour < 3):
+        can_cancel = False
+
+    if 'cancel_reservation' in request.POST:
+        if can_cancel:
+            reservation.delete()
+
+    context = {
+        "reservation" : reservation,
+        "can_cancel" : can_cancel
+    }
+    return render(request, 'reservation_details.html', context)
+
+# def cancel_reservation(request, reservation_id):
+#     return can_cancel (request, 'dashboard.html', context)
+#
+
+
+
+
 def create_event(request):
     if not request.user.is_authenticated:
         messages.warning(request, "messages : You don\'t have access ")
@@ -91,10 +118,9 @@ def create_event(request):
         if form.is_valid():
             event = form.save(commit=False)
             event.created_by = request.user
-            event.remaining_tickets = form.cleaned_data['max_capacity']
-
-            event.save()
+            event.max_capacity = form.cleaned_data['max_capacity']
             event.remaining_tickets = event.max_capacity
+            event.save()
 
             return redirect('events_list')
     context = {
@@ -138,7 +164,8 @@ def book_tickets(request, event_slug):
                 event.remaining_tickets = event.max_capacity - reservation.num_tickets
                 reservation.guest = request.user
                 reservation.event = event
-                reservation.date = event.date
+                reservation.event_date = event.date
+                reservation.event_time = event.time
                 reservation.save()
                 event.save()
                 messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")

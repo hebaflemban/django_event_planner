@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<header class="masthead text-center text-white">
+  <div class="masthead-content">
+    <div class="container">
+        <div class="jumbotron">
+          <h2 class="masthead-subheading mb-0">{{reservation.event}} reservation</h2>
+          <p>{{reservation.created_by}}</p>
+          <p>{{reservation.event_date}}</p>
+          <p>{{reservation.event_time}}</p>
+          <p>{{reservation.num_tickets}}</p>
+          <form action="" method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="reservation_id" name="cancel_reservation" value="{{reservation.id}}">
+            {% if can_cancel %}
+              <button type="submit" class="btn btn-primary btn-xl rounded-pill mt-5" value="Create">Cancel</button>
+            {% else %}
+              <button type="button" class="btn btn-secondary btn-lgrounded-pill mt-5" disabled>Cancel</button>
+            {% endif %}
+          </form>
+
+        </div>
+    </div>
+  </div>
+  <div class="bg-circle-1 bg-circle"></div>
+  <div class="bg-circle-2 bg-circle"></div>
+  <div class="bg-circle-3 bg-circle"></div>
+  <div class="bg-circle-4 bg-circle"></div>
+</header>
+{% endblock %}

@@ -33,7 +33,8 @@ class Event(models.Model):
     name = models.CharField(max_length = 50)
     status = models.CharField(max_length=1, default='a', choices=STATUS)
     images = models.ImageField(null= True, blank = True)
-    date = models.DateTimeField(null= True, blank = True)
+    date = models.DateField(null= True, blank = True)
+    time = models.TimeField(null= True, blank = True)
     post_date = models.DateField(auto_now_add=True)
     description = models.TextField(null= True, blank = True)
     location = models.CharField(max_length = 50, null= True, blank = True)
@@ -45,7 +46,7 @@ class Event(models.Model):
     remaining_tickets = models.PositiveIntegerField(default=max_capacity, null= True, blank = True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,
                     related_name='events', related_query_name ='organizer')
-    tags = models.ManyToManyField(Tag, related_name='events')
+    tags = models.ManyToManyField(Tag, related_name='events',null= True, blank = True)
 
     def __str__(self):
         return f"{self.id} - {self.name} - {self.created_by}"
@@ -57,7 +58,8 @@ class Event(models.Model):
 class Reservation(models.Model):
     guest = models.ForeignKey(User, related_name= 'reservations', on_delete=models.CASCADE)
     event = models.ForeignKey(Event, related_name= 'reservations',on_delete=models.CASCADE)
-    date = models.DateField(null= True, blank = True)
+    event_date = models.DateField(null= True, blank = True)
+    event_time = models.TimeField(null= True, blank = True)
     num_tickets = models.PositiveIntegerField(default=1, null= True, blank = True)
     reservation_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
