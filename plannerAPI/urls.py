@@ -13,7 +13,7 @@ urlpatterns = [
     path('api/signup/', SignupAPI.as_view(), name='api_sigup'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 
-    path('events/cteate/', CreateEvent.as_view() , name='create_event'),
+    path('events/cteate/', CreateEvent.as_view() , name='create_event_api'),
     path('events/modify/<int:event_id>/', ModifyEvent.as_view() , name='modify_event'),
     path('events/book/<int:event_id>/', BookEvent.as_view() , name='book_event'),
 

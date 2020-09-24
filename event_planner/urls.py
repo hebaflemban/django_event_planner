@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('events.urls')),
-    path('', include('plannerAPI.urls')),
+    path('api/', include('plannerAPI.urls')),
 
 ]
 

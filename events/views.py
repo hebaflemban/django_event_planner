@@ -9,11 +9,16 @@ from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from django.http import Http404
 from django.contrib import messages
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .forms import UserSignup, UserLogin, UserProfile, EventForm, ReservationForm
 from .models import Event, Connection, Tag, Reservation
+from event_planner import settings
 
+
+def home(request):
+    return render(request, 'home.html')
 
 
 def dashboard(request, user_id):
@@ -37,10 +42,6 @@ def dashboard(request, user_id):
         "past_reservations" : user.reservations.filter(event_date__lt = timezone.now())
     }
     return render (request, 'dashboard.html', context)
-
-
-def home(request):
-    return render(request, 'home.html')
 
 
 def update_profile(request, user_id):
@@ -93,7 +94,11 @@ def reservation_details(request, reservation_id):
 
     if 'cancel_reservation' in request.POST:
         if can_cancel:
+            reservation.event.remaining_tickets += reservation.num_tickets
+            user_id = reservation.guest.id
             reservation.delete()
+            messages.warning(request, f"Your reservation has been cancelled")
+            return redirect("dashboard", user_id)
 
     context = {
         "reservation" : reservation,
@@ -106,13 +111,12 @@ def reservation_details(request, reservation_id):
 #
 
 
-
-
 def create_event(request):
     if not request.user.is_authenticated:
         messages.warning(request, "messages : You don\'t have access ")
         raise Http404('You don\'t have access ')
     form = EventForm()
+    to_emails=[]
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
@@ -122,6 +126,22 @@ def create_event(request):
             event.remaining_tickets = event.max_capacity
             event.save()
 
+            for follower in request.user.followers.all():
+                to_emails.append(follower.following_user.email)
+
+            messages.success(request,
+                f"You have successfully created {event.name}!\n \
+                An invitation email will be sent to your followers! ")
+
+            subject = f"New event by {event.created_by.first_name} {event.created_by.last_name} from Orange Door! "
+            text_content=f"{event.created_by.first_name} {event.created_by.last_name} is organizing a new event,\n
+                     check it out and buy your tickets before they're sold out!\n\n
+                     Event: {event.name} on  {event.date} at {event.time}.\n
+                     Price: ${event.price}\n\n
+                     Regards,\nOrange Door Team.\n"
+
+            msg = EmailMultiAlternatives(subject, text_content, [settings.EMAIL_HOST_USER], bcc=to_emails)
+            msg.send()
             return redirect('events_list')
     context = {
         'form': form,
@@ -168,7 +188,23 @@ def book_tickets(request, event_slug):
                 reservation.event_time = event.time
                 reservation.save()
                 event.save()
-                messages.success(request, f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!")
+
+                messages.success(request,
+                    f"You have successfully booked {reservation.num_tickets} seats for the {event.name}!\n \
+                    A confirmation email with your reservation details has been sent to you! ")
+
+                email = reservation.guest.email
+                first_name = reservation.guest.first_name
+                last_name = reservation.guest.last_name
+                subject = "Orange Door tickets confirmation"
+                message=f"Dear  %s %s:\n\n\
+                         This email is a summary of your reservation:\n\n
+                         Event: {event.name} on  {event.date} at {event.time}.\n
+                         Number of tickets: {reservation.num_tickets} X ${event.price}\n
+                         Total: ${reservation.num_tickets*event.price}\n
+                         Enjoy it!\nRegards,\nOrange Door Team.\n" % (first_name, last_name)
+
+                send_mail(subject, message, email, [settings.EMAIL_HOST_USER], fail_silently=False)
                 return redirect('dashboard', request.user.id)
 
     context = {
