@@ -7,12 +7,16 @@
     <div class="container">
         <div class="jumbotron">
           <h2 class=""> {{profile}}'s Dashboard</h2>
-          <h6 class=""> Followers : {{profile.followers.count}} </h6>
+          <h6 class=""> Followers : {{profile.followers.count}}</h6>
           <h6 class=""> Following : {{profile.following.count}}</h6>
-
+          <br>
+          <br>
+          <br>
           <h6 class=""> {{profile}}'s Events:</h6>
           {% for event in profile.events.all %}
+            <a href="{% url 'event_details' event.slug %}"
             <p class="">{{event.name}}</p>
+            </a>
           {% endfor %}
 
           {% if request.user != profile %}
@@ -32,14 +36,16 @@
           {% endif %}
 
           {% if request.user == profile %}
-
+<br>
+<br>
               <h6 class=""> My Reservations:</h6>
               {% for reservation in upcoming_resevations %}
                 <a href="{% url 'reservation_details' reservation.id %}"
                 <p class="">{{reservation.event.name}} - {{reservation.event_date}} - {{reservation.num_tickets}}</p>
                 </a>
               {% endfor %}
-
+              <br>
+              <br>
               <h6 class=""> Past Reservations:</h6>
               {% for reservation in past_reservations %}
                 <p class="">{{reservation.event.name}} - {{reservation.event.date}} - {{reservation.num_tickets}}</p>

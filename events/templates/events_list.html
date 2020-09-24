@@ -7,38 +7,65 @@
         <div class="jumbotron">
           <h2 class="masthead-subheading mb-0">Available Events:</h2>
 
-            {% if search_result %}
-              {% for event_s in search_result %}
-              <div class = 'row'>
-                  <a href="{% url 'event_details' event_s.slug %}"
-                  <p> {{event_s.name}} - {{event_s.created_by}} - {{event_s.date}} - {{event_s.location}}</p>
-                  </a>
-                  {% if event_s.remaining_tickets != 0 %}
-                    <a href="{% url 'book_tickets' event_s.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
-                  {% else %}
-                    <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
-                  {% endif %}
-              </div>
+          <div class="row row-cols-1 row-cols-md-2 m-5">
+
+              {% if search_result %}
+                {% for event_s in search_result %}
+                <div class = 'row'>
+                    {% if event_s.images %}
+                      <img src="{{event_s.images.url}}" class="card-img-top"  alt="...">
+                    {% endif %}
+                    <a href="{% url 'event_details' event_s.slug %}"
+                    <p> {{event_s.name}} - {{event_s.created_by}} - {{event_s.date}} - {{event_s.location}}</p>
+                    </a>
+                    {% if event_s.remaining_tickets != 0 %}
+                      <a href="{% url 'book_tickets' event_s.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
+                    {% else %}
+                      <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+              {% else %}
+
+              {% for event in events %}
+                <div class="col-4 mb-4">
+                  <div class="card bg-transparent border-transparent text-white">
+                        {% if event.images %}
+                          <img src="{{event.images.url}}" class="card-img-top"  style=" height: 200px; object-fit: cover;" alt="Card image cap">
+                        {% endif %}
+                        <div class="card-body">
+
+                          <a href="{% url 'event_details' event.slug %}"
+                          <h5 class="card-title" style="font-family: 'Assistant', sans-serif;font-family: 'Bebas Neue', cursive; font-family: 'Roboto Mono', monospace;">
+                            {{event.name}} </h5>
+                          </a>
+                          <br>
+                          <a href="{% url 'dashboard' event.created_by.id %}"
+                          <p class="card-text text-left " style = "font-family: 'Assistant', sans-serif;font-family: 'Bebas Neue', cursive;font-family: 'Nunito', sans-serif;font-family: 'Roboto Mono', monospace;">
+                            Organized by: {{event.created_by}}</p>
+                          </a>
+                          <p class="card-text text-left " style = "font-family: 'Assistant', sans-serif;font-family: 'Bebas Neue', cursive;font-family: 'Nunito', sans-serif;font-family: 'Roboto Mono', monospace;">
+                             {{event.date}}</p>
+                           <p class="card-text text-left " style = "font-family: 'Assistant', sans-serif;font-family: 'Bebas Neue', cursive;font-family: 'Nunito', sans-serif;font-family: 'Roboto Mono', monospace;">
+                              ${{event.time}}</p>
+                          <p class="card-text text-left " style = "font-family: 'Assistant', sans-serif;font-family: 'Bebas Neue', cursive;font-family: 'Nunito', sans-serif;font-family: 'Roboto Mono', monospace;">
+                             ${{event.price}}</p>
+                        </div>
+
+                        {% if event.remaining_tickets != 0 %}
+                          <a href="{% url 'book_tickets' event.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
+                        {% else %}
+                          <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
+                        {% endif %}
+                  </div>
+                </div>
               {% endfor %}
 
-            {% else %}
 
-            {% for event in events %}
-              <div class = 'row'>
-                  <a href="{% url 'event_details' event.slug %}"
-                  <p> {{event.name}} - {{event.created_by}} - {{event.date}} - {{event.location}}</p>
-                  <p> {{event_s.name}} - {{event_s.created_by}} - {{event_s.date}} - {{event_s.location}}</p>
-                  </a>
-                  {% if event.remaining_tickets != 0 %}
-                    <a href="{% url 'book_tickets' event.slug %}" class="btn btn-primary btn-sl rounded-pill mt-5">Book your Tickets!</a>
-                  {% else %}
-                    <a href="#" class="btn btn-primary btn-sl rounded-pill mt-5 disabled" role="button" aria-disabled="true">Sorry Fully booked!</a>
-                  {% endif %}
-              </div>
-            {% endfor %}
+              {% endif %}
+          </div>
 
-
-            {% endif %}
       </div>
     </div>
   </div>

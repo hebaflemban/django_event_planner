@@ -61,14 +61,15 @@ def update_profile(request, user_id):
 
 
 def events_list(request):
-    active_events = Event.objects.all()
-    # filter(date__gte = timezone.now())
+    active_events = Event.objects.filter(date__gte = timezone.now())
     search_result = None
     search_term = None
     if 'search_events' in request.GET:
         search_term = request.GET['search_events']
         search_result = active_events.filter(Q(name__icontains=search_term) |
-                        Q(description__icontains=search_term) | Q(created_by__username__icontains=search_term))
+                        Q(description__icontains=search_term) |
+                        Q(created_by__username__icontains=search_term)|
+                        Q(tags__name__icontains=search_term))
     context = {
         'events': active_events,
         'search_result' : search_result
@@ -134,11 +135,14 @@ def create_event(request):
                 An invitation email will be sent to your followers! ")
 
             subject = f"New event by {event.created_by.first_name} {event.created_by.last_name} from Orange Door! "
-            text_content=f"{event.created_by.first_name} {event.created_by.last_name} is organizing a new event,\n
-                     check it out and buy your tickets before they're sold out!\n\n
-                     Event: {event.name} on  {event.date} at {event.time}.\n
-                     Price: ${event.price}\n\n
-                     Regards,\nOrange Door Team.\n"
+            text_content=f"""{event.created_by.first_name} {event.created_by.last_name} is organizing a new event,
+                     check it out and buy your tickets before they're sold out!
+
+                     Event: {event.name} on  {event.date} at {event.time}.
+                     Price: ${event.price}
+
+                     Regards,
+                     Orange Door Team."""
 
             msg = EmailMultiAlternatives(subject, text_content, [settings.EMAIL_HOST_USER], bcc=to_emails)
             msg.send()
@@ -156,7 +160,7 @@ def update_event(request, event_slug):
         raise Http404('You don\'t have access ')
     form = EventForm(instance=event)
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
             return redirect('events_list')
@@ -197,12 +201,18 @@ def book_tickets(request, event_slug):
                 first_name = reservation.guest.first_name
                 last_name = reservation.guest.last_name
                 subject = "Orange Door tickets confirmation"
-                message=f"Dear  %s %s:\n\n\
-                         This email is a summary of your reservation:\n\n
-                         Event: {event.name} on  {event.date} at {event.time}.\n
-                         Number of tickets: {reservation.num_tickets} X ${event.price}\n
-                         Total: ${reservation.num_tickets*event.price}\n
-                         Enjoy it!\nRegards,\nOrange Door Team.\n" % (first_name, last_name)
+                message=f"""Dear  %s %s:
+
+                         This email is a summary of your reservation:
+
+                         Event: {event.name} on  {event.date} at {event.time}.
+                         Number of tickets: {reservation.num_tickets} X ${event.price}
+                         Total: ${reservation.num_tickets*event.price}
+
+                         Enjoy it!
+
+                         Regards,
+                         Orange Door Team.""" % (first_name, last_name)
 
                 send_mail(subject, message, email, [settings.EMAIL_HOST_USER], fail_silently=False)
                 return redirect('dashboard', request.user.id)

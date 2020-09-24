@@ -6,7 +6,7 @@
     <div class="container">
         <div class="jumbotron">
           <h2 class="masthead-subheading mb-0">Create a new event</h2>
-          <form action="{% url 'create_event' %}" method="POST">
+          <form action="{% url 'create_event' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{form|crispy}}
             <input class = "btn btn-primary btn-xl rounded-pill mt-5" type="submit" value="Create Event!">

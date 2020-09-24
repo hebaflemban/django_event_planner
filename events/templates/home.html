@@ -4,8 +4,8 @@
 <header class="masthead text-center text-white">
   <div class="masthead-content">
     <div class="container">
-      <h1 class="masthead-heading mb-0">All the events,</h1>
-      <h2 class="masthead-subheading mb-0">You could ever want...</h2>
+      <h1 class="masthead-heading mb-0"></h1>
+      <p class="masthead-subheading mb-0">Planning your dream events is only one click away...or maybe a few</p>
       {% if request.user.is_anonymous %}
         <a href="{% url 'signup' %}" class="btn btn-primary btn-xl rounded-pill mt-5">Sign up to find events!</a>
       {% else %}
