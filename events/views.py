@@ -61,7 +61,7 @@ def update_profile(request, user_id):
 
 
 def events_list(request):
-    active_events = Event.objects.filter(date__gte = timezone.now())
+    active_events = Event.objects.filter(Q(date__gte = timezone.now())|Q(time__gte = timezone.now()))
     search_result = None
     search_term = None
     if 'search_events' in request.GET:
@@ -185,7 +185,7 @@ def book_tickets(request, event_slug):
                 return redirect("book_tickets", event_slug)
             else:
                 reservation = form.save(commit=False)
-                event.remaining_tickets = event.max_capacity - reservation.num_tickets
+                event.remaining_tickets = event.remaining_tickets - reservation.num_tickets
                 reservation.guest = request.user
                 reservation.event = event
                 reservation.event_date = event.date
